@@ -84,8 +84,12 @@ def check_closure(uid, persona, st, rng=None):
     m = metrics(uid, persona)
     tr = persona["traits"]
     thr = 5.0 + 9.0 * tr["forgiveness"] - 3.0 * tr["pride"]
-    if m["p_hurt"] >= thr and m["bond"] >= 1.5:
-        final = tr["forgiveness"] < 0.3
+    # zamknąć relację można dopiero, gdy jest co zamykać: kilka dni znajomości i realna więź.
+    # Obelga od niemal obcego człowieka to zły dzień, a nie koniec świata.
+    if m["p_hurt"] >= thr and m["bond"] >= 3.0 and m["days"] >= 4:
+        # "na stałe" od razu tylko przy mało wybaczającym charakterze i naprawdę bliskiej relacji;
+        # w pozostałych przypadkach stałość przychodzi po nieudanych próbach naprawy (try_repair)
+        final = tr["forgiveness"] < 0.3 and m["bond"] >= 5.0
 
         def f(s):
             s["closed"] = {"ts": clock.now_ts(), "final": final, "attempts": 0}

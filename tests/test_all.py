@@ -138,7 +138,7 @@ class Relationship(unittest.TestCase):
     def test_closure_final_for_unforgiving(self):
         self.pers["traits"].update(forgiveness=0.1, pride=0.9)
         db.save_persona(self.uid, self.pers)
-        for i in range(4):
+        for i in range(14):   # dwa tygodnie znajomości: jest co zamykać
             db.x("INSERT INTO messages(user_id,ts,role,text) VALUES(?,?,?,?)", (self.uid, clock.now_ts() - i * 86400, "user", "x"))
         for _ in range(4):
             R.add_event(self.uid, self.pers, "betrayal", 5, "zdrada", "boli", True)
@@ -146,6 +146,17 @@ class Relationship(unittest.TestCase):
         st = db.get_state(self.uid)
         self.assertTrue(st["closed"]["final"])
         self.assertEqual(R.try_repair(self.uid, self.pers, st), "final")
+
+
+    def test_no_closure_for_new_acquaintance(self):
+        """Obelga w pierwszych godzinach nie kończy znajomości, choćby postać była mało wybaczająca."""
+        self.pers["traits"].update(forgiveness=0.05, pride=0.95)
+        db.save_persona(self.uid, self.pers)
+        db.x("INSERT INTO messages(user_id,ts,role,text) VALUES(?,?,?,?)", (self.uid, clock.now_ts(), "user", "x"))
+        for _ in range(3):
+            R.add_event(self.uid, self.pers, "insult", 5, "obelga", "boli", True)
+        self.assertFalse(R.check_closure(self.uid, self.pers, db.get_state(self.uid)))
+        self.assertFalse(db.get_state(self.uid)["closed"])
 
 
 class Memory(unittest.TestCase):
