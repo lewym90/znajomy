@@ -17,7 +17,7 @@ ORIGIN = os.environ.get("ZNAJOMY_ORIGIN", "")   # np. https://lewym90.github.io 
 # Modele
 LLM = os.environ.get("ZNAJOMY_LLM", "gemini")                 # gemini | mock | openai
 INTIMATE_LLM = os.environ.get("ZNAJOMY_INTIMATE_LLM", "")     # opcjonalny osobny dostawca
-GEMINI_MODEL = os.environ.get("ZNAJOMY_GEMINI_MODEL", "gemini-2.5-flash")
+GEMINI_MODEL = os.environ.get("ZNAJOMY_GEMINI_MODEL", "gemini-3.5-flash")
 GEMINI_BASE = os.environ.get("ZNAJOMY_GEMINI_BASE", "https://generativelanguage.googleapis.com/v1beta")
 GEMINI_KEY_FILE = os.environ.get("ZNAJOMY_GEMINI_KEY_FILE", "/opt/typer/gemini_key")
 OPENAI_BASE = os.environ.get("ZNAJOMY_OPENAI_BASE", "http://127.0.0.1:11434/v1")

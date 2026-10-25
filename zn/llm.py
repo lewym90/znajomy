@@ -45,7 +45,18 @@ def _throttle():
         _last_call[0] = time.time()
 
 
-def _post(url, body, headers, timeout=45):
+_think_variant = [0]
+
+
+def _api_msg(e):
+    """Krótki komunikat błędu z API (to tekst techniczny dostawcy, bez treści rozmów)."""
+    try:
+        return str(json.loads(e.read().decode()).get("error", {}).get("message", ""))[:140]
+    except Exception:
+        return ""
+
+
+def _post(url, body, headers, timeout=60):
     req = urllib.request.Request(url, data=json.dumps(body).encode(), headers=headers, method="POST")
     delays = [0, 8, 20]
     last = None
@@ -64,7 +75,8 @@ def _post(url, body, headers, timeout=45):
         except (urllib.error.URLError, TimeoutError) as e:
             last = e
             continue
-    raise LLMError("brak odpowiedzi od dostawcy: %s" % (type(last).__name__,))
+    detail = ("HTTP %s" % last.code) if isinstance(last, urllib.error.HTTPError) else type(last).__name__
+    raise LLMError("brak odpowiedzi od dostawcy: %s" % detail)
 
 
 def _merge(history):
@@ -85,21 +97,32 @@ def _gemini(system, history, temperature, max_tokens, json_mode):
     if not key:
         raise LLMError("brak klucza Gemini")
     contents = [{"role": m["role"], "parts": [{"text": m["text"]}]} for m in _merge(history)]
-    gen = {"temperature": temperature, "maxOutputTokens": max_tokens}
+    # nowsze modele "myślą" przed odpowiedzią, a te tokeny liczą się do limitu, więc dajemy duży zapas
+    gen = {"temperature": temperature, "maxOutputTokens": max_tokens + 3000}
     if json_mode:
         gen["responseMimeType"] = "application/json"
     body = {"systemInstruction": {"parts": [{"text": system}]}, "contents": contents, "generationConfig": gen}
     url = "%s/models/%s:generateContent" % (config.GEMINI_BASE, config.GEMINI_MODEL)
     headers = {"Content-Type": "application/json", "x-goog-api-key": key}
-    body["generationConfig"]["thinkingConfig"] = {"thinkingBudget": 0}
-    try:
-        data = _post(url, body, headers)
-    except urllib.error.HTTPError as e:
-        if e.code == 400:   # model może nie znać thinkingConfig
-            body["generationConfig"].pop("thinkingConfig", None)
-            data = _post(url, body, headers)
+    # różne rodziny modeli różnie wyłączają "myślenie": próbujemy po kolei i zapamiętujemy, co działa
+    variants = [{"thinkingBudget": 0}, {"thinkingLevel": "minimal"}, None]
+    start = _think_variant[0]
+    data = None
+    for i in range(start, len(variants)):
+        if variants[i] is None:
+            gen.pop("thinkingConfig", None)
         else:
-            raise LLMError("HTTP %s" % e.code)
+            gen["thinkingConfig"] = variants[i]
+        try:
+            data = _post(url, body, headers)
+            _think_variant[0] = i
+            break
+        except urllib.error.HTTPError as e:
+            if e.code == 400 and i < len(variants) - 1:
+                continue
+            raise LLMError("HTTP %s: %s" % (e.code, _api_msg(e)))
+    if data is None:
+        raise LLMError("brak odpowiedzi")
     if (data.get("promptFeedback") or {}).get("blockReason"):
         raise Blocked("prompt zablokowany")
     cands = data.get("candidates") or []

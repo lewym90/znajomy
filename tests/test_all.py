@@ -263,7 +263,15 @@ class GeminiAdapter(unittest.TestCase):
                 body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
                 outer.seen = {"path": self.path, "key": self.headers.get("x-goog-api-key"), "body": body}
                 mode = outer.mode
-                if mode == "ok":
+                tc = (body.get("generationConfig") or {}).get("thinkingConfig") or {}
+                if mode == "think400" and "thinkingBudget" in tc:
+                    raw = json.dumps({"error": {"message": "thinkingBudget not supported"}}).encode()
+                    self.send_response(400)
+                    self.send_header("Content-Length", str(len(raw)))
+                    self.end_headers()
+                    self.wfile.write(raw)
+                    return
+                if mode in ("ok", "think400"):
                     resp = {"candidates": [{"content": {"parts": [{"text": "hej"}]}}]}
                 elif mode == "blocked":
                     resp = {"promptFeedback": {"blockReason": "SAFETY"}}
@@ -299,6 +307,17 @@ class GeminiAdapter(unittest.TestCase):
         self.assertEqual(roles[0], "user")                     # zaczyna od user
         self.assertEqual(roles, ["user", "model", "user"])     # scalone kolejne role
         self.assertIn("b\nc", b["contents"][2]["parts"][0]["text"])
+
+    def test_thinking_fallback_and_token_headroom(self):
+        llm._think_variant[0] = 0
+        self.mode = "think400"
+        out = llm.generate("S", [{"role": "user", "text": "x"}], 0.9, 500)
+        self.assertEqual(out, "hej")
+        gc = self.seen["body"]["generationConfig"]
+        self.assertEqual(gc["thinkingConfig"], {"thinkingLevel": "minimal"})   # pierwszy wariant odrzucony
+        self.assertGreaterEqual(gc["maxOutputTokens"], 3500)
+        self.assertEqual(llm._think_variant[0], 1)                             # zapamiętane
+        llm._think_variant[0] = 0
 
     def test_blocked(self):
         for mode in ("blocked", "finish"):
