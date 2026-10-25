@@ -69,3 +69,5 @@ Rozmowy są w bazie `/var/lib/znajomy/znajomy.db` na serwerze. Do logów nie tra
 - Rozmowa z prawdziwym Gemini (adapter sprawdzony tylko na lokalnej atrapie serwera). Pierwsze rozmowy testuj sam i zobacz, czy ton Ci pasuje.
 - Powiadomienia push na prawdziwym iPhonie.
 - Jakość polszczyzny i "ludzkość" odpowiedzi: to zależy od modelu i będzie wymagało strojenia opisów w `zn/prompts.py` oraz `zn/day.py`.
+
+- `ZNAJOMY_QUICK_REPLY=1` skraca czas oczekiwania na odpowiedź do kilkunastu sekund (tylko do testów rozmowy; wyłącz na co dzień).

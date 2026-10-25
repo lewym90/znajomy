@@ -202,6 +202,8 @@ def reply_delay(r, st, persona, mood, hot, bond, now_ts):
         med = (25 + 40 * (1 - ch)) if hot else (120 + 600 * (1 - ch))
         d = _lognormal(r, med)
     d *= 1.0 + max(0.0, -mood) * 1.2
+    if config.QUICK_REPLY:
+        d = min(d, r.uniform(6, 25))
     if config.FAST:
         d = min(max(d / 120.0, 1.0), 12.0)
     return max(4.0 if not config.FAST else 1.0, d)

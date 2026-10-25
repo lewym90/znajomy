@@ -11,6 +11,7 @@ PORT = int(os.environ.get("ZNAJOMY_PORT", "8095"))
 
 DEV = os.environ.get("ZNAJOMY_DEV") == "1"      # pozwala na dowolny kod dostępu
 FAST = os.environ.get("ZNAJOMY_FAST") == "1"    # skraca opóźnienia (testy)
+QUICK_REPLY = os.environ.get("ZNAJOMY_QUICK_REPLY") == "1"   # odpowiedzi w kilkanaście sekund (do testów rozmowy)
 CODES = [c.strip() for c in os.environ.get("ZNAJOMY_CODES", "").split(",") if c.strip()]
 ORIGIN = os.environ.get("ZNAJOMY_ORIGIN", "")   # np. https://lewym90.github.io (CORS)
 

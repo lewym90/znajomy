@@ -99,6 +99,17 @@ class Day(unittest.TestCase):
         self.assertGreater(len(moods), 15)
         self.assertTrue(min(moods) < -0.1 and max(moods) > 0.1)
 
+    def test_quick_reply_caps_delay(self):
+        pers = P.birth(2)
+        st = {"state": "sleeping", "until": clock.now_ts() + 4 * 3600, "why": "śpi"}
+        old = (config.FAST, config.QUICK_REPLY)
+        config.FAST, config.QUICK_REPLY = False, True
+        try:
+            ds = [D.reply_delay(random.Random(i), st, pers, -0.8, False, 2, clock.now_ts()) for i in range(30)]
+        finally:
+            config.FAST, config.QUICK_REPLY = old
+        self.assertLess(max(ds), 60)
+
     def test_delay_sleeping_is_long(self):
         pers = P.birth(2)
         st = {"state": "sleeping", "until": clock.now_ts() + 4 * 3600, "why": "śpi"}
