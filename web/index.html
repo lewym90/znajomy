@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Znajomy">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+<title>Znajomy</title>
+</head>
+<body>
+
+<section id="welcome" class="screen hidden">
+  <div class="welcome-inner">
+    <div class="logo" aria-hidden="true"></div>
+    <h1>Znajomy</h1>
+    <p class="lead">Poznajesz kogoś nowego. Nie wiesz jeszcze, kim dla Ciebie będzie.</p>
+    <form id="reg" autocomplete="off">
+      <label class="field">
+        <span>Kod dostępu</span>
+        <input id="code" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" required>
+      </label>
+      <label class="check"><input id="adult" type="checkbox"><span>Mam ukończone 18 lat.</span></label>
+      <label class="check"><input id="ai" type="checkbox"><span>Rozumiem, że rozmawiam z postacią stworzoną przez AI. Zachowuje się jak człowiek, ale nim nie jest.</span></label>
+      <p id="regerr" class="err" role="alert"></p>
+      <button id="regbtn" class="primary" type="submit">Zaczynamy</button>
+    </form>
+  </div>
+</section>
+
+<section id="chat" class="screen hidden">
+  <header>
+    <div id="avatar" class="avatar">?</div>
+    <div class="who">
+      <div id="name" class="name">Nowy znajomy</div>
+      <div id="status" class="status"></div>
+    </div>
+    <button id="menubtn" class="icon" aria-label="Menu">⋮</button>
+  </header>
+  <div id="iosHint" class="hint hidden">
+    Żeby dostawać wiadomości jak z komunikatora, dodaj aplikację do ekranu początkowego: Udostępnij, potem „Do ekranu początkowego”.
+    <button id="iosHintClose" class="link">Zamknij</button>
+  </div>
+  <main id="log" aria-live="polite"></main>
+  <form id="composer">
+    <textarea id="input" rows="1" placeholder="Napisz wiadomość" enterkeyhint="send" autocomplete="off"></textarea>
+    <button id="send" class="sendbtn" type="submit" aria-label="Wyślij">↑</button>
+  </form>
+</section>
+
+<div id="sheet" class="sheet hidden" role="dialog" aria-modal="true">
+  <div class="sheet-body">
+    <button id="notifbtn" class="row">Włącz powiadomienia</button>
+    <button id="aboutbtn" class="row">O aplikacji</button>
+    <button id="resetbtn" class="row danger">Zacznij od nowa (zapomnij wszystko)</button>
+    <button id="sheetclose" class="row muted">Zamknij</button>
+    <div id="about" class="about hidden">
+      Znajomy to postać tworzona przez AI. Ma własny charakter, nastroje i pamięć, więc potrafi być miła, uparta albo obrażona.
+      Rozmowy są zapisane na serwerze właściciela aplikacji i nie są nigdzie publikowane.
+      Jeśli jest Ci bardzo ciężko, napisz też do kogoś bliskiego. W nagłym zagrożeniu życia: 112, telefon zaufania dla dorosłych: 116 123.
+    </div>
+    <div id="sheetmsg" class="sheetmsg"></div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

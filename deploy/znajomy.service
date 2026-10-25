@@ -1,0 +1,14 @@
+[Unit]
+Description=Znajomy
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/znajomy
+EnvironmentFile=/etc/znajomy.env
+ExecStart=/usr/bin/python3 -m zn
+Restart=always
+RestartSec=3
+User=root
+
+[Install]
+WantedBy=multi-user.target

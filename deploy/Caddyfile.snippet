@@ -1,0 +1,5 @@
+# Dopisz wewnątrz istniejącego bloku 188-68-247-201.sslip.io { ... } w Caddyfile
+redir /znajomy /znajomy/
+handle_path /znajomy/* {
+    reverse_proxy 127.0.0.1:8095
+}
